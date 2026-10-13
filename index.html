@@ -336,21 +336,23 @@ $('generateNames').onclick=()=>{let t=$('nameType').value,s=$('nameStyle').value
 window.copyName=n=>{if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(n).then(()=>toast('Copied name.')).catch(()=>toast(n));else toast(n);};
 $('exportBtn').onclick=()=>{let blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='business-dashboard-backup.json';a.click();URL.revokeObjectURL(url);toast('Backup export started. Keep the file safe.');};
 renderAll();invoiceCalc();renderSavedInvoices();
-</script>
 function renderMonthlyReport(){
-  const month=$('reportMonth').value;
-  const entries=data.finance.filter(x=>x.date&&x.date.startsWith(month));
-  const income=entries.filter(x=>x.type==='income').reduce((s,x)=>s+x.amount,0);
-  const expense=entries.filter(x=>x.type==='expense').reduce((s,x)=>s+x.amount,0);
-  const pending=data.udhaar.reduce((s,x)=>s+Math.max(0,x.amount-x.received),0);
-  $('reportIncome').textContent=fmt(income);
-  $('reportExpense').textContent=fmt(expense);
-  $('reportNet').textContent=fmt(income-expense);
-  $('reportNet').style.color=income-expense<0?'var(--red)':'var(--text)';
-  $('reportUdhaar').textContent=fmt(pending);
+const month=$('reportMonth').value;
+const entries=data.finance.filter(x=>x.date&&x.date.startsWith(month));
+const income=entries.filter(x=>x.type==='income').reduce((s,x)=>s+x.amount,0);
+const expense=entries.filter(x=>x.type==='expense').reduce((s,x)=>s+x.amount,0);
+const pending=data.udhaar.reduce((s,x)=>s+Math.max(0,x.amount-x.received),0);
+$('reportIncome').textContent=fmt(income);
+$('reportExpense').textContent=fmt(expense);
+$('reportNet').textContent=fmt(income-expense);
+$('reportNet').style.color=income-expense<0?'var(--red)':'var(--text)';
+$('reportUdhaar').textContent=fmt(pending);
 }
 $('reportMonth').value=today.slice(0,7);
 $('reportMonth').onchange=renderMonthlyReport;
+renderMonthlyReport();
+</script>
+
 <script>
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
@@ -359,14 +361,6 @@ if ("serviceWorker" in navigator) {
   });
 }
 </script>
-  
-<script>
-window.addEventListener("load", function () {
-  setTimeout(function () {
-    const splash = document.getElementById("splash-screen");
-
-    if (splash) {
-      splash.classList.add("splash-hidden");
 
       setTimeout(function () {
         splash.remove();
