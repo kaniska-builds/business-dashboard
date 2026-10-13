@@ -38,9 +38,79 @@ th{color:#c4b5fd}
 .tag.paid{background:#14392c;color:#86efac}
 .mobile-menu{background:#24182f;color:#eadcff}
 @media(max-width:700px){.mobile-menu{background:#24182f;color:#eadcff}}
+
+#splash-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at top, #25205b, #0b1020 65%);
+  color: #ffffff;
+  font-family: Arial, sans-serif;
+  text-align: center;
+  transition: opacity 0.5s ease;
+}
+
+.splash-logo {
+  width: 88px;
+  height: 88px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 25px;
+  background: linear-gradient(135deg, #8b5cf6, #4f46e5);
+  box-shadow: 0 0 35px #7c3aed80;
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+#splash-screen h1 {
+  margin: 24px 0 8px;
+  font-size: 25px;
+}
+
+#splash-screen p {
+  margin: 0;
+  color: #b8b5d8;
+  font-size: 14px;
+}
+
+.splash-loader {
+  width: 34px;
+  height: 34px;
+  margin-top: 35px;
+  border: 3px solid #ffffff30;
+  border-top-color: #a78bfa;
+  border-radius: 50%;
+  animation: splash-spin 0.8s linear infinite;
+}
+
+@keyframes splash-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+#splash-screen.splash-hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+  
 </style>
 </head>
 <body>
+  
+<div id="splash-screen">
+  <div class="splash-logo">BD</div>
+  <h1>Business Dashboard</h1>
+  <p>Your Business. Simplified.</p>
+  <div class="splash-loader"></div>
+</div>
+  
 <div class="app">
   <aside class="sidebar" id="sidebar">
     <div class="brand"><div class="logo">BD</div><div><strong>Business Dashboard</strong><small>Your Business. Simplified.</small></div></div>
@@ -211,7 +281,7 @@ function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&l
 $('addUdhaar').onclick=()=>{let name=$('udName').value.trim(),amount=Number($('udAmount').value);if(!name||!$('udAmount').value||amount<=0)return toast('Enter a customer name and amount above ₹0.');data.udhaar.unshift({id:Date.now(),name,phone:$('udPhone').value.trim(),amount,received:0,note:$('udNote').value.trim(),date:today});['udName','udPhone','udAmount','udNote'].forEach(id=>$(id).value='');save();toast('Udhaar entry added.');};
 function renderUdhaar(){$('udTable').innerHTML=data.udhaar.map(x=>`<tr><td><strong>${esc(x.name)}</strong><br><span class="muted">${esc(x.note||'')}</span></td><td>${esc(x.phone||'—')}</td><td>${fmt(x.amount)}</td><td>${fmt(x.received)}</td><td><strong>${fmt(Math.max(0,x.amount-x.received))}</strong></td><td><button class="btn secondary" onclick="receiveUdhaar(${x.id})">Receive</button> <button class="btn danger" onclick="deleteItem('udhaar',${x.id})">Delete</button></td></tr>`).join('');$('udEmpty').classList.toggle('hidden',data.udhaar.length>0);}
 window.receiveUdhaar=id=>{let x=data.udhaar.find(a=>a.id===id);if(!x)return;let rem=Math.max(0,x.amount-x.received);if(rem<=0)return toast('This entry is already fully paid.');let raw=prompt('Payment received (balance: '+fmt(rem)+')');if(raw===null)return;let n=Number(raw);if(!Number.isFinite(n)||n<=0)return toast('Enter a valid payment amount.');x.received=Math.min(x.amount,x.received+n);save();toast('Payment recorded.');};
-$('addStock').onclick=()=>{let name=$('stockName').value.trim(),qty=Number($('stockQty').value),cost=Number($('stockCost').value);if(!name||$('stockQty').value===''||$('stockCost').value===''||qty<0||cost<0)return toast('Enter product, quantity and cost.');data.stock.unshift({id:Date.now(),name,sku:$('stockSku').value.trim(),qty,cost});['stockName','stockSku','stockQty','stockCost'].forEach(id=>$(id).value='');save();toast('Product added.');};
+$('addStock').onclick=()=>{let name=$('stockName').v alue.trim(),qty=Number($('stockQty').value),cost=Number($('stockCost').value);if(!name||$('stockQty').value===''||$('stockCost').value===''||qty<0||cost<0)return toast('Enter product, quantity and cost.');data.stock.unshift({id:Date.now(),name,sku:$('stockSku').value.trim(),qty,cost});['stockName','stockSku','stockQty','stockCost'].forEach(id=>$(id).value='');save();toast('Product added.');};
 function renderStock(){$('stockTable').innerHTML=data.stock.map(x=>`<tr><td><strong>${esc(x.name)}</strong></td><td>${esc(x.sku||'—')}</td><td>${x.qty}${x.qty<=5?' <span class="tag">Low stock</span>':''}</td><td>${fmt(x.cost)}</td><td>${fmt(x.qty*x.cost)}</td><td><button class="btn danger" onclick="deleteItem('stock',${x.id})">Delete</button></td></tr>`).join('');$('stockEmpty').classList.toggle('hidden',data.stock.length>0);$('stockSummary').textContent=`${data.stock.length} products · ${fmt(data.stock.reduce((a,x)=>a+x.qty*x.cost,0))} stock value`;}
 $('addFinance').onclick=()=>{let amount=Number($('finAmount').value),category=$('finCategory').value.trim();if(!$('finAmount').value||amount<=0||!category)return toast('Enter amount above ₹0 and a category.');data.finance.unshift({id:Date.now(),type:$('finType').value,amount,category,date:$('finDate').value||today,note:$('finNote').value.trim()});['finAmount','finCategory','finNote'].forEach(id=>$(id).value='');$('finDate').value=today;save();toast('Entry saved.');};
 function renderFinance(){$('finTable').innerHTML=data.finance.map(x=>`<tr><td>${esc(x.date)}</td><td><span class="tag ${x.type==='income'?'paid':''}">${x.type==='income'?'Income':'Expense'}</span></td><td>${esc(x.category)}</td><td>${esc(x.note||'—')}</td><td><strong>${fmt(x.amount)}</strong></td><td><button class="btn danger" onclick="deleteItem('finance',${x.id})">Delete</button></td></tr>`).join('');$('finEmpty').classList.toggle('hidden',data.finance.length>0);}
@@ -234,5 +304,22 @@ if ("serviceWorker" in navigator) {
   });
 }
 </script>
+  
+<script>
+window.addEventListener("load", function () {
+  setTimeout(function () {
+    const splash = document.getElementById("splash-screen");
+
+    if (splash) {
+      splash.classList.add("splash-hidden");
+
+      setTimeout(function () {
+        splash.remove();
+      }, 500);
+    }
+  }, 500);
+});
+</script>
+  
 </body>
 </html>
