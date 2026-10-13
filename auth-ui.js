@@ -56,6 +56,7 @@ screen.innerHTML = `
     </form>
     <button id="authToggle" class="secondary" type="button">Create new account</button>
     <button id="authGoogle" class="secondary" type="button">Continue with Google</button>
+    <button id="resendVerification" class="secondary" type="button">Resend Verification Email</button>
     <p id="authMessage" role="status"></p>
   </div>
 `;
@@ -183,3 +184,41 @@ onAuthStateChanged(auth, async (user) => {
   account.textContent =
     `👤 ${user.displayName || user.email || "Account"} · Logout`;
 });
+
+document.getElementById("resendVerification").onclick = async () => {
+  const email = document.getElementById("authEmail").value.trim();
+  const password = document.getElementById("authPassword").value;
+  const message = document.getElementById("authMessage");
+
+  if (!email || !password) {
+    message.textContent = "Enter your email and password first.";
+    return;
+  }
+
+  message.textContent = "Please wait...";
+
+  try {
+    const credential = await signInWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
+
+    await credential.user.reload();
+
+    if (credential.user.emailVerified) {
+      message.textContent = "Email already verified. Please log in.";
+      await signOut(auth);
+      return;
+    }
+
+    await sendEmailVerification(credential.user);
+    await signOut(auth);
+
+    message.textContent =
+      "New verification email requested. Check inbox and spam.";
+  } catch (error) {
+    message.textContent = error.message;
+  }
+};
+
