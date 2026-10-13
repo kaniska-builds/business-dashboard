@@ -297,7 +297,7 @@ let data = {udhaar:[],stock:[],finance:[],invoices:[]};
 try { const saved=JSON.parse(localStorage.getItem('bd_data')||'null'); if(saved) data={...data,...saved,invoices:Array.isArray(saved.invoices)?saved.invoices:[]}; } catch(e){}
 function save(){try{localStorage.setItem('bd_data',JSON.stringify(data));}catch(e){toast('Could not save: browser storage may be full.');}renderAll();}
 function toast(msg){const el=$('toast');el.textContent=msg;el.style.display='block';clearTimeout(window._toastTimer);window._toastTimer=setTimeout(()=>el.style.display='none',2600);}
-const titles={home:'Overview',invoice:'Invoice Maker',calculators:'Business Calculators',udhaar:'Udhaar Tracker',inventory:'Stock Manager',finance:'Income & Expenses',names:'Business Name Generator'};
+const titles={home:'Overview',invoice:'Invoice Maker',calculators:'Business Calculators',udhaar:'Udhaar Tracker',inventory:'Stock Manager',finance:'Income & Expenses',report:'Monthly Report',names:'Business Name Generator'};
 function showPage(page){document.querySelectorAll('.tool-page').forEach(s=>s.classList.remove('active'));$('page-home').classList.toggle('hidden',page!=='home');if(page!=='home')$('page-'+page).classList.add('active');document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===page));$('topTitle').textContent=titles[page]||'Overview';$('sidebar').classList.remove('open');window.scrollTo({top:0,behavior:'smooth'});}
 document.querySelectorAll('#nav button').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.page)));
 $('menuBtn').addEventListener('click',()=>$('sidebar').classList.toggle('open'));
