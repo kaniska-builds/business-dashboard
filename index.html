@@ -225,5 +225,14 @@ window.copyName=n=>{if(navigator.clipboard&&navigator.clipboard.writeText)naviga
 $('exportBtn').onclick=()=>{let blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='business-dashboard-backup.json';a.click();URL.revokeObjectURL(url);toast('Backup export started. Keep the file safe.');};
 renderAll();invoiceCalc();renderSavedInvoices();
 </script>
+
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js")
+      .catch((error) => console.error("Service Worker error:", error));
+  });
+}
+</script>
 </body>
 </html>
