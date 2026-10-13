@@ -328,6 +328,7 @@ $('addFinance').onclick=()=>{let amount=Number($('finAmount').value),category=$(
 function renderFinance(){$('finTable').innerHTML=data.finance.map(x=>`<tr><td>${esc(x.date)}</td><td><span class="tag ${x.type==='income'?'paid':''}">${x.type==='income'?'Income':'Expense'}</span></td><td>${esc(x.category)}</td><td>${esc(x.note||'—')}</td><td><strong>${fmt(x.amount)}</strong></td><td><button class="btn danger" onclick="deleteItem('finance',${x.id})">Delete</button></td></tr>`).join('');$('finEmpty').classList.toggle('hidden',data.finance.length>0);}
 window.deleteItem=(group,id)=>{if(!confirm('Delete this record?'))return;data[group]=data[group].filter(x=>x.id!==id);save();};
 function renderStats(){let inc=data.finance.filter(x=>x.type==='income').reduce((a,x)=>a+x.amount,0),exp=data.finance.filter(x=>x.type==='expense').reduce((a,x)=>a+x.amount,0),ud=data.udhaar.reduce((a,x)=>a+Math.max(0,x.amount-x.received),0);$('statIncome').textContent=fmt(inc);$('statExpense').textContent=fmt(exp);$('statNet').textContent=fmt(inc-exp);$('statNet').style.color=inc-exp<0?'var(--red)':'var(--text)';$('statUdhaar').textContent=fmt(ud);}
+  
 function renderAll(){renderUdhaar();renderStock();renderFinance();renderStats();}
 const nameBits={general:['Nexa','Bright','Prime','Urban','Evergreen','BluePeak','TrueNorth','Nova'],food:['Spice','Saffron','FreshFork','Crave','Cedar','Tasty','DailyBite','Harvest'],fashion:['Thread','Loom','Vogue','Mode','Velvet','Aura','Stitch','UrbanWear'],tech:['Nexbyte','Cloud','Pixel','Circuit','DataNest','ByteCraft','CoreTech','NovaTech'],construction:['StoneBridge','BuildRight','IronPeak','SolidBase','Brickline','PrimeBuild','Stronghold','Civic'],beauty:['Glow','PureAura','Bloom','VelvetSkin','Lush','Serene','Radiant','Aura'],trade:['PrimeTrade','NorthStar','SwiftSupply','TradeBridge','BulkWise','Meridian','DirectSource','TrustCart']};
 const endings={modern:['Labs','Works','Connect','Solutions','Point','Edge','Works','Hub'],premium:[' & Co.',' Collective',' Select',' House',' Signature',' Elite',' Partners',' Studio'],indian:[' Enterprises',' Vyapar',' Udyog',' Bazaar',' Traders',' Mart',' Associates',' Ventures'],simple:['Store','Services','Traders','Supplies','Company','Mart','Solutions','Enterprises']};
@@ -336,7 +337,20 @@ window.copyName=n=>{if(navigator.clipboard&&navigator.clipboard.writeText)naviga
 $('exportBtn').onclick=()=>{let blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='business-dashboard-backup.json';a.click();URL.revokeObjectURL(url);toast('Backup export started. Keep the file safe.');};
 renderAll();invoiceCalc();renderSavedInvoices();
 </script>
-
+function renderMonthlyReport(){
+  const month=$('reportMonth').value;
+  const entries=data.finance.filter(x=>x.date&&x.date.startsWith(month));
+  const income=entries.filter(x=>x.type==='income').reduce((s,x)=>s+x.amount,0);
+  const expense=entries.filter(x=>x.type==='expense').reduce((s,x)=>s+x.amount,0);
+  const pending=data.udhaar.reduce((s,x)=>s+Math.max(0,x.amount-x.received),0);
+  $('reportIncome').textContent=fmt(income);
+  $('reportExpense').textContent=fmt(expense);
+  $('reportNet').textContent=fmt(income-expense);
+  $('reportNet').style.color=income-expense<0?'var(--red)':'var(--text)';
+  $('reportUdhaar').textContent=fmt(pending);
+}
+$('reportMonth').value=today.slice(0,7);
+$('reportMonth').onchange=renderMonthlyReport;
 <script>
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
