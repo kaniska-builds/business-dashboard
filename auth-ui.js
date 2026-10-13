@@ -1,4 +1,3 @@
-
 import {
   auth,
   googleProvider,
@@ -6,7 +5,8 @@ import {
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
-  onAuthStateChanged
+  onAuthStateChanged,
+  sendEmailVerification
 } from "./auth.js";
 
 const style = document.createElement("style");
@@ -77,14 +77,46 @@ document.getElementById("authToggle").onclick = () => {
 
 document.getElementById("authForm").onsubmit = async (event) => {
   event.preventDefault();
+
   const email = document.getElementById("authEmail").value.trim();
   const password = document.getElementById("authPassword").value;
   message.textContent = "Please wait...";
+
   try {
     if (isSignup) {
-      await createUserWithEmailAndPassword(auth, email, password);
+      const credential =
+        await createUserWithEmailAndPassword(auth, email, password);
+
+      await sendEmailVerification(credential.user);
+      await signOut(auth);
+
+      isSignup = false;
+      document.getElementById("authHeading").textContent =
+        "Login to your account";
+      document.getElementById("authSubmit").textContent = "Login";
+      document.getElementById("authToggle").textContent =
+        "Create new account";
+
+      message.textContent =
+        "Verification email sent! Check your inbox and spam folder. Verify your email, then log in.";
     } else {
-      await signInWithEmailAndPassword(auth, email, password);
+      const credential =
+        await signInWithEmailAndPassword(auth, email, password);
+
+      await credential.user.reload();
+
+      const isPasswordAccount = credential.user.providerData.some(
+        (provider) => provider.providerId === "password"
+      );
+
+      if (isPasswordAccount && !credential.user.emailVerified) {
+        message.textContent =
+          "Please verify your email first. Check your inbox and spam folder.";
+        await signOut(auth);
+        return;
+      }
+
+      message.textContent = "Login successful!";
     }
   } catch (error) {
     message.textContent = error.message;
@@ -93,6 +125,7 @@ document.getElementById("authForm").onsubmit = async (event) => {
 
 document.getElementById("authGoogle").onclick = async () => {
   message.textContent = "Opening Google sign-in...";
+
   try {
     await signInWithPopup(auth, googleProvider);
   } catch (error) {
@@ -100,7 +133,7 @@ document.getElementById("authGoogle").onclick = async () => {
   }
 };
 
-onAuthStateChanged(auth, (user) => {
+onAuthStateChanged(auth, async (user) => {
   let account = document.getElementById("authAccount");
 
   if (!user) {
@@ -109,11 +142,31 @@ onAuthStateChanged(auth, (user) => {
     return;
   }
 
+  const isPasswordAccount = user.providerData.some(
+    (provider) => provider.providerId === "password"
+  );
+
+  if (isPasswordAccount && !user.emailVerified) {
+    screen.style.display = "grid";
+    if (account) account.remove();
+
+    message.textContent =
+      "Please verify your email before accessing the dashboard.";
+
+    try {
+      await signOut(auth);
+    } catch (error) {
+      message.textContent = error.message;
+    }
+    return;
+  }
+
   screen.style.display = "none";
 
   if (!account) {
     account = document.createElement("button");
     account.id = "authAccount";
+
     account.onclick = async () => {
       if (confirm("Do you want to log out?")) {
         try {
@@ -123,8 +176,10 @@ onAuthStateChanged(auth, (user) => {
         }
       }
     };
+
     document.body.appendChild(account);
   }
 
-  account.textContent = `👤 ${user.displayName || user.email || "Account"} · Logout`;
+  account.textContent =
+    `👤 ${user.displayName || user.email || "Account"} · Logout`;
 });
