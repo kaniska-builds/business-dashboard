@@ -361,13 +361,23 @@ if ("serviceWorker" in navigator) {
 }
 </script>
 
-      setTimeout(function () {
-        splash.remove();
-      }, 500);
-    }
+
+<script>
+window.addEventListener("load", function () {
+  const splash = document.getElementById("splash-screen");
+
+  if (!splash) return;
+
+  setTimeout(function () {
+    splash.classList.add("splash-hidden");
+
+    setTimeout(function () {
+      splash.remove();
+    }, 500);
   }, 500);
 });
 </script>
+  
 <button onclick="exportBusinessBackup()" style="position:fixed;bottom:15px;right:15px;z-index:9999;padding:12px 16px;border:0;border-radius:12px;background:#6d5dfc;color:white;font-weight:bold;">
   💾 Backup Data
 </button>
