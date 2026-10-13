@@ -121,6 +121,7 @@ th{color:#c4b5fd}
       <button data-page="udhaar"><span class="ico">◉</span> Udhaar Tracker</button>
       <button data-page="inventory"><span class="ico">▦</span> Stock Manager</button>
       <button data-page="finance"><span class="ico">₹</span> Income & Expenses</button>
+      <button data-page="report"><span class="ico">📊</span> Monthly Report</button>
       <button data-page="names"><span class="ico">✦</span> Business Name Generator</button>
     </nav>
     <div class="side-note"><strong>Free tools for your business</strong><br>Starter version · Your entries stay in this browser on this device.</div>
@@ -235,6 +236,46 @@ th{color:#c4b5fd}
         <div class="panel"><div class="panel-head"><h2>Recent entries</h2><span class="muted">All records on this device</span></div><div class="table-wrap"><table><thead><tr><th>Date</th><th>Type</th><th>Category</th><th>Note</th><th>Amount</th><th>Action</th></tr></thead><tbody id="finTable"></tbody></table></div><div id="finEmpty" class="empty-state">No income or expense entries yet.</div></div>
       </section>
 
+<section id="page-report" class="tool-page">
+  <div class="section-intro">
+    <h1>Monthly Profit &amp; Loss Report</h1>
+    <p>Review your monthly business performance.</p>
+  </div>
+
+  <div class="panel">
+    <div class="field">
+      <label for="reportMonth">Choose month</label>
+      <input id="reportMonth" type="month">
+    </div>
+
+    <div class="cards" style="margin-top:18px">
+      <div class="stat">
+        <div class="stat-head">Monthly Income</div>
+        <div class="stat-value" id="reportIncome">₹0</div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-head">Monthly Expenses</div>
+        <div class="stat-value" id="reportExpense">₹0</div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-head">Net Profit / Loss</div>
+        <div class="stat-value" id="reportNet">₹0</div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-head">Pending Udhaar</div>
+        <div class="stat-value" id="reportUdhaar">₹0</div>
+      </div>
+    </div>
+
+    <p class="small-note">
+      Pending udhaar is shown separately from monthly profit.
+    </p>
+  </div>
+</section>
+      
       <section id="page-names" class="tool-page">
         <div class="section-intro"><h1>Business Name Generator</h1><p>Generate starter ideas by business type. Check availability before using any name.</p></div>
         <div class="panel"><div class="form-grid">
